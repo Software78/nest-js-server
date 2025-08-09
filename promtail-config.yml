@@ -1,0 +1,46 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: nestjs-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nestjs
+          __path__: /var/log/nestjs/*.log
+    
+    # Parse JSON logs
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            requestId: requestId
+            method: method
+            url: url
+            ip: ip
+            userAgent: userAgent
+            statusCode: statusCode
+            duration: duration
+            type: type
+      
+      # Convert timestamp to proper format
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+      
+      # Add labels for filtering
+      - labels:
+          level:
+          method:
+          type:
+          statusCode:
