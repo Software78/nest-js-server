@@ -66,7 +66,10 @@ export class PaginationMetaDto {
   @ApiProperty({ description: 'Whether there is a next page', example: true })
   hasNext: boolean;
 
-  @ApiProperty({ description: 'Whether there is a previous page', example: false })
+  @ApiProperty({
+    description: 'Whether there is a previous page',
+    example: false,
+  })
   hasPrev: boolean;
 
   constructor(page: number, limit: number, total: number) {

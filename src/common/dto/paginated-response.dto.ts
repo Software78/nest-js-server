@@ -15,11 +15,17 @@ export class PaginatedDataDto<T> {
   }
 }
 
-export class PaginatedResponseDto<T> extends BaseResponseDto<PaginatedDataDto<T>> {
+export class PaginatedResponseDto<T> extends BaseResponseDto<
+  PaginatedDataDto<T>
+> {
   @ApiProperty({ description: 'Paginated data', type: PaginatedDataDto })
   declare data: PaginatedDataDto<T>;
 
-  constructor(items: T[], meta: PaginationMetaDto, message = 'Data retrieved successfully') {
+  constructor(
+    items: T[],
+    meta: PaginationMetaDto,
+    message = 'Data retrieved successfully',
+  ) {
     const paginatedData = new PaginatedDataDto(items, meta);
     super(true, message, paginatedData);
   }
@@ -29,7 +35,7 @@ export class PaginatedResponseDto<T> extends BaseResponseDto<PaginatedDataDto<T>
     page: number,
     limit: number,
     total: number,
-    message = 'Data retrieved successfully'
+    message = 'Data retrieved successfully',
   ): PaginatedResponseDto<T> {
     const meta = new PaginationMetaDto(page, limit, total);
     return new PaginatedResponseDto(items, meta, message);

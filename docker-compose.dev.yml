@@ -7,7 +7,7 @@ services:
       POSTGRES_DB: nestjs_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=trust"
+      POSTGRES_INITDB_ARGS: '--auth-host=md5 --auth-local=trust'
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - '5432:5432'
@@ -15,7 +15,44 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d nestjs_db"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d nestjs_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: nestjs_db
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass redis123
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,6 +75,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_NAME: nestjs_db
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/nestjs_db?authSource=admin
+      MONGO_DB_NAME: nestjs_db
+      REDIS_URI: redis://:redis123@redis:6379
+      REDIS_PASSWORD: redis123
+      REDIS_DB: 0
       JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
       NODE_ENV: development
       PORT: 3000
@@ -49,6 +91,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -57,7 +103,7 @@ services:
     image: grafana/loki:2.9.0
     restart: unless-stopped
     ports:
-      - "3100:3100"
+      - '3100:3100'
     volumes:
       - ./loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
@@ -83,7 +129,7 @@ services:
     image: grafana/grafana:10.1.0
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -97,6 +143,8 @@ services:
 
 volumes:
   postgres_data:
+  mongodb_data:
+  redis_data:
   loki_data:
   grafana_data:
 

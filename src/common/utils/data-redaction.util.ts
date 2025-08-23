@@ -72,10 +72,10 @@ export function isSensitiveField(fieldName: string): boolean {
   if (!fieldName || typeof fieldName !== 'string') {
     return false;
   }
-  
+
   const lowerFieldName = fieldName.toLowerCase();
-  return SENSITIVE_FIELDS.some(sensitiveField => 
-    lowerFieldName.includes(sensitiveField)
+  return SENSITIVE_FIELDS.some((sensitiveField) =>
+    lowerFieldName.includes(sensitiveField),
   );
 }
 
@@ -86,11 +86,9 @@ export function isSensitiveUrl(url: string): boolean {
   if (!url || typeof url !== 'string') {
     return false;
   }
-  
+
   const lowerUrl = url.toLowerCase();
-  return SENSITIVE_URL_PATTERNS.some(pattern => 
-    lowerUrl.includes(pattern)
-  );
+  return SENSITIVE_URL_PATTERNS.some((pattern) => lowerUrl.includes(pattern));
 }
 
 /**
@@ -100,7 +98,7 @@ export function isSensitiveHeader(headerName: string): boolean {
   if (!headerName || typeof headerName !== 'string') {
     return false;
   }
-  
+
   const lowerHeaderName = headerName.toLowerCase();
   return SENSITIVE_HEADERS.includes(lowerHeaderName);
 }
@@ -130,11 +128,11 @@ export function redactSensitiveData(obj: any, maxDepth = 10): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => redactSensitiveData(item, maxDepth - 1));
+    return obj.map((item) => redactSensitiveData(item, maxDepth - 1));
   }
 
   const redacted: any = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     if (isSensitiveField(key)) {
       redacted[key] = REDACTED_VALUE;
@@ -151,13 +149,15 @@ export function redactSensitiveData(obj: any, maxDepth = 10): any {
 /**
  * Redact sensitive headers from request/response headers
  */
-export function redactHeaders(headers: Record<string, any>): Record<string, any> {
+export function redactHeaders(
+  headers: Record<string, any>,
+): Record<string, any> {
   if (!headers || typeof headers !== 'object') {
     return headers;
   }
 
   const redacted: Record<string, any> = {};
-  
+
   for (const [key, value] of Object.entries(headers)) {
     if (isSensitiveHeader(key)) {
       redacted[key] = REDACTED_VALUE;
@@ -172,13 +172,15 @@ export function redactHeaders(headers: Record<string, any>): Record<string, any>
 /**
  * Redact sensitive query parameters
  */
-export function redactQueryParams(query: Record<string, any>): Record<string, any> {
+export function redactQueryParams(
+  query: Record<string, any>,
+): Record<string, any> {
   if (!query || typeof query !== 'object') {
     return query;
   }
 
   const redacted: Record<string, any> = {};
-  
+
   for (const [key, value] of Object.entries(query)) {
     if (isSensitiveField(key)) {
       redacted[key] = REDACTED_VALUE;
@@ -218,7 +220,7 @@ export function sanitizeUrl(url: string): string {
   try {
     const urlObj = new URL(url, 'http://localhost');
     const sanitizedParams = new URLSearchParams();
-    
+
     for (const [key, value] of urlObj.searchParams.entries()) {
       if (isSensitiveField(key)) {
         sanitizedParams.append(key, REDACTED_VALUE);
@@ -226,10 +228,11 @@ export function sanitizeUrl(url: string): string {
         sanitizedParams.append(key, value);
       }
     }
-    
-    const sanitizedUrl = urlObj.pathname + 
+
+    const sanitizedUrl =
+      urlObj.pathname +
       (sanitizedParams.toString() ? '?' + sanitizedParams.toString() : '');
-    
+
     return sanitizedUrl;
   } catch {
     // If URL parsing fails, return original (it's probably just a path)

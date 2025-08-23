@@ -10,7 +10,11 @@ import {
 } from '@nestjs/swagger';
 import { UserResponseDto } from '../auth/dto/auth-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { BaseResponseDto, PaginatedResponseDto, PaginationQueryDto } from '../common/dto';
+import {
+  BaseResponseDto,
+  PaginatedResponseDto,
+  PaginationQueryDto,
+} from '../common/dto';
 import { UsersService } from './users.service';
 
 @ApiTags('Users')
@@ -18,7 +22,7 @@ import { UsersService } from './users.service';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Get()
   @ApiOperation({
@@ -31,8 +35,12 @@ export class UsersController {
     description: 'Users retrieved successfully',
     type: PaginatedResponseDto<UserResponseDto>,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing JWT token' })
-  async findAll(@Query() paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async findAll(
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<UserResponseDto>> {
     return this.usersService.findAllPaginated(paginationQuery);
   }
 
@@ -52,8 +60,12 @@ export class UsersController {
     description: 'User not found',
     type: BaseResponseDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing JWT token' })
-  async findOne(@Param('uuid') uuid: string): Promise<BaseResponseDto<UserResponseDto>> {
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async findOne(
+    @Param('uuid') uuid: string,
+  ): Promise<BaseResponseDto<UserResponseDto>> {
     return this.usersService.findOneByUuid(uuid);
   }
 }

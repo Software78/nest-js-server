@@ -21,7 +21,9 @@ export class EmailService {
     const smtpPass = this.configService.get<string>('SMTP_PASS');
 
     if (!smtpHost || !smtpUser || !smtpPass) {
-      this.logger.warn('SMTP configuration incomplete. Email functionality disabled.');
+      this.logger.warn(
+        'SMTP configuration incomplete. Email functionality disabled.',
+      );
       return;
     }
 
@@ -60,16 +62,23 @@ export class EmailService {
     await this.sendEmail(email, subject, html);
   }
 
-  private async sendEmail(to: string, subject: string, html: string): Promise<void> {
+  private async sendEmail(
+    to: string,
+    subject: string,
+    html: string,
+  ): Promise<void> {
     try {
       if (!this.transporter) {
         // Log OTP instead of sending email when SMTP is not configured
         const otpCode = this.extractOTPFromHTML(html);
-        this.logger.info('Email service not configured. OTP for password reset:', {
-          email: to,
-          subject,
-          otpCode: otpCode,
-        });
+        this.logger.info(
+          'Email service not configured. OTP for password reset:',
+          {
+            email: to,
+            subject,
+            otpCode: otpCode,
+          },
+        );
         // Also log the OTP separately for easy visibility in development
         if (this.configService.get<string>('NODE_ENV') === 'development') {
           console.log(`🔑 PASSWORD RESET OTP for ${to}: ${otpCode}`);
@@ -78,7 +87,10 @@ export class EmailService {
       }
 
       const mailOptions = {
-        from: this.configService.get<string>('SMTP_FROM', 'noreply@example.com'),
+        from: this.configService.get<string>(
+          'SMTP_FROM',
+          'noreply@example.com',
+        ),
         to,
         subject,
         html,
@@ -96,7 +108,7 @@ export class EmailService {
         to,
         subject,
       });
-      
+
       // Fallback: Log OTP when email fails
       const otpCode = this.extractOTPFromHTML(html);
       this.logger.info('Email failed, logging OTP for password reset:', {

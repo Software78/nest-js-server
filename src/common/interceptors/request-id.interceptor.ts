@@ -12,7 +12,7 @@ import {
   isSensitiveUrl,
   redactHeaders,
   redactSensitiveData,
-  sanitizeUrl
+  sanitizeUrl,
 } from '../utils/data-redaction.util';
 
 export const REQUEST_ID_HEADER = 'x-request-id';
@@ -25,13 +25,13 @@ export class RequestIdInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    
+
     // Generate or use existing request ID
     const requestId = request.headers[REQUEST_ID_HEADER] || uuidv4();
-    
+
     // Add request ID to request object for use in other parts of the app
     request[REQUEST_ID_KEY] = requestId;
-    
+
     // Add request ID to response headers
     response.setHeader(REQUEST_ID_HEADER, requestId);
 
@@ -51,7 +51,7 @@ export class RequestIdInterceptor implements NestInterceptor {
       url: sanitizedUrl,
       ip,
       userAgent,
-      type: 'request_start'
+      type: 'request_start',
     };
 
     // Only log headers and body for non-sensitive URLs or in redacted form
@@ -92,7 +92,7 @@ export class RequestIdInterceptor implements NestInterceptor {
             sanitizedUrl,
             statusCode,
             duration,
-            logMetadata
+            logMetadata,
           );
         },
         error: (error) => {
@@ -109,7 +109,7 @@ export class RequestIdInterceptor implements NestInterceptor {
             ip,
             userAgent,
             error: error.message,
-            type: 'request_error'
+            type: 'request_error',
           };
 
           // Only include stack trace for non-sensitive URLs
@@ -119,8 +119,8 @@ export class RequestIdInterceptor implements NestInterceptor {
 
           // Log error request completion
           this.logger.error('Request failed', errorLogData);
-        }
-      })
+        },
+      }),
     );
   }
 }

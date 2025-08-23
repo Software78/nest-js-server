@@ -27,5 +27,5 @@ export function transformUsersToDto(users: User[]): UserResponseDto[] {
     return [];
   }
 
-  return users.filter(user => user !== null).map(transformUserToDto);
+  return users.filter((user) => user !== null).map(transformUserToDto);
 }

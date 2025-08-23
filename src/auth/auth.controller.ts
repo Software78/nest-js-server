@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -7,14 +14,17 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BaseResponseDto } from '../common/dto';
 import { AuthService } from './auth.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto, RefreshTokenResponseDto } from './dto/refresh-token.dto';
+import {
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
+} from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -24,15 +34,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Register a new user',
-    description: 'Create a new user account with email and password'
+    description: 'Create a new user account with email and password',
   })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'User successfully registered',
-    type: AuthResponseDto
+    type: AuthResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
   @ApiConflictResponse({ description: 'User with this email already exists' })
@@ -41,15 +51,15 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Login user',
-    description: 'Authenticate user with email and password'
+    description: 'Authenticate user with email and password',
   })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'User successfully authenticated',
-    type: AuthResponseDto
+    type: AuthResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -60,13 +70,14 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({
     summary: 'Refresh access token',
-    description: 'Generate new access and refresh tokens using a valid refresh token'
+    description:
+      'Generate new access and refresh tokens using a valid refresh token',
   })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Tokens refreshed successfully',
-    type: BaseResponseDto<RefreshTokenResponseDto>
+    type: BaseResponseDto<RefreshTokenResponseDto>,
   })
   @ApiUnauthorizedResponse({ description: 'Invalid refresh token' })
   async refreshToken(@Body(ValidationPipe) refreshTokenDto: RefreshTokenDto) {
@@ -76,32 +87,36 @@ export class AuthController {
   @Post('forgot-password')
   @ApiOperation({
     summary: 'Request password reset',
-    description: 'Send OTP to user email for password reset'
+    description: 'Send OTP to user email for password reset',
   })
   @ApiBody({ type: ForgotPasswordDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'OTP sent successfully (if email exists)',
-    type: BaseResponseDto
+    type: BaseResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
-  async forgotPassword(@Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto) {
+  async forgotPassword(
+    @Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto,
+  ) {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @Post('reset-password')
   @ApiOperation({
     summary: 'Reset password with OTP',
-    description: 'Reset user password using OTP code'
+    description: 'Reset user password using OTP code',
   })
   @ApiBody({ type: ResetPasswordDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Password reset successfully',
-    type: BaseResponseDto
+    type: BaseResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid OTP or input data' })
-  async resetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+  async resetPassword(
+    @Body(ValidationPipe) resetPasswordDto: ResetPasswordDto,
+  ) {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
@@ -110,12 +125,12 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Logout user',
-    description: 'Invalidate refresh token and logout user'
+    description: 'Invalidate refresh token and logout user',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'User logged out successfully',
-    type: BaseResponseDto
+    type: BaseResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing JWT token' })
   async logout(@Request() req: any) {

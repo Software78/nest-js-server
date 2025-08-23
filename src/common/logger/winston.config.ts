@@ -20,18 +20,22 @@ export class WinstonLoggerService {
     const consoleFormat = winston.format.combine(
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       winston.format.colorize(),
-      winston.format.printf(({ timestamp, level, message, requestId, ...meta }) => {
-        const requestIdStr = requestId ? `[${requestId}]` : '';
-        const metaStr = Object.keys(meta).length ? `\n${JSON.stringify(meta, null, 2)}` : '';
-        return `${timestamp} ${level} ${requestIdStr} ${message}${metaStr}`;
-      })
+      winston.format.printf(
+        ({ timestamp, level, message, requestId, ...meta }) => {
+          const requestIdStr = requestId ? `[${requestId}]` : '';
+          const metaStr = Object.keys(meta).length
+            ? `\n${JSON.stringify(meta, null, 2)}`
+            : '';
+          return `${timestamp} ${level} ${requestIdStr} ${message}${metaStr}`;
+        },
+      ),
     );
 
     // File format for production
     const fileFormat = winston.format.combine(
       winston.format.timestamp(),
       winston.format.errors({ stack: true }),
-      winston.format.json()
+      winston.format.json(),
     );
 
     const transports: winston.transport[] = [];
@@ -42,7 +46,7 @@ export class WinstonLoggerService {
         new winston.transports.Console({
           format: consoleFormat,
           level: logLevel,
-        })
+        }),
       );
     }
 
@@ -76,7 +80,7 @@ export class WinstonLoggerService {
         maxFiles: '7d',
         format: fileFormat,
         level: 'info',
-      })
+      }),
     );
 
     return winston.createLogger({
@@ -90,7 +94,7 @@ export class WinstonLoggerService {
           maxSize: '20m',
           maxFiles: '30d',
           format: fileFormat,
-        })
+        }),
       ],
       rejectionHandlers: [
         new DailyRotateFile({
@@ -99,7 +103,7 @@ export class WinstonLoggerService {
           maxSize: '20m',
           maxFiles: '30d',
           format: fileFormat,
-        })
+        }),
       ],
     });
   }
@@ -129,7 +133,14 @@ export class WinstonLoggerService {
     this.logger.debug(message, safeMeta);
   }
 
-  logRequest(requestId: string, method: string, url: string, statusCode: number, duration: number, meta?: any) {
+  logRequest(
+    requestId: string,
+    method: string,
+    url: string,
+    statusCode: number,
+    duration: number,
+    meta?: any,
+  ) {
     const safeMeta = meta ? createSafeLogObject(meta) : {};
     this.logger.info('HTTP Request', {
       requestId,
@@ -138,7 +149,7 @@ export class WinstonLoggerService {
       statusCode,
       duration: `${duration}ms`,
       type: 'request',
-      ...safeMeta
+      ...safeMeta,
     });
   }
 }

@@ -12,4 +12,3 @@ export * from '../logger/winston.config';
 // Utilities
 export * from '../utils/data-redaction.util';
 export * from '../utils/user-transform.util';
-

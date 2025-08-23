@@ -1,11 +1,11 @@
 import { Exclude } from 'class-transformer';
 import {
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Generated,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Generated,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 export abstract class BaseEntity {

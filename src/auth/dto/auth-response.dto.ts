@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BaseResponseDto } from '../../common/dto';
 
 export class UserResponseDto {
-  @ApiProperty({ 
-    example: '123e4567-e89b-12d3-a456-426614174000', 
-    description: 'User UUID (external identifier)' 
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'User UUID (external identifier)',
   })
   uuid: string;
 
@@ -17,10 +17,16 @@ export class UserResponseDto {
   @ApiProperty({ example: 'Doe', description: 'User last name' })
   last_name: string;
 
-  @ApiProperty({ example: '2023-01-01T00:00:00.000Z', description: 'Creation date' })
+  @ApiProperty({
+    example: '2023-01-01T00:00:00.000Z',
+    description: 'Creation date',
+  })
   created_at: Date;
 
-  @ApiProperty({ example: '2023-01-01T00:00:00.000Z', description: 'Last update date' })
+  @ApiProperty({
+    example: '2023-01-01T00:00:00.000Z',
+    description: 'Last update date',
+  })
   updated_at: Date;
 }
 
@@ -49,7 +55,10 @@ export class AuthResponseDto extends BaseResponseDto<AuthDataDto> {
     super(true, message, authData);
   }
 
-  static create(authData: AuthDataDto, message = 'Authentication successful'): AuthResponseDto {
+  static create(
+    authData: AuthDataDto,
+    message = 'Authentication successful',
+  ): AuthResponseDto {
     return new AuthResponseDto(authData, message);
   }
 }

@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -11,7 +16,10 @@ import { User } from '../entities/user.entity';
 import { AuthDataDto, AuthResponseDto } from './dto/auth-response.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto, RefreshTokenResponseDto } from './dto/refresh-token.dto';
+import {
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
+} from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
@@ -27,10 +35,10 @@ export class AuthService {
 
   private generateTokens(userId: number, email: string) {
     const payload = { sub: userId, email };
-    
+
     const access_token = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refresh_token = this.jwtService.sign(payload, { expiresIn: '7d' });
-    
+
     return { access_token, refresh_token };
   }
 
@@ -42,7 +50,9 @@ export class AuthService {
     const { email, first_name, last_name, password } = registerDto;
 
     // Check if user already exists
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
@@ -61,7 +71,10 @@ export class AuthService {
     const savedUser = await this.userRepository.save(user);
 
     // Generate JWT tokens
-    const { access_token, refresh_token } = this.generateTokens(savedUser.id, savedUser.email);
+    const { access_token, refresh_token } = this.generateTokens(
+      savedUser.id,
+      savedUser.email,
+    );
 
     // Save refresh token to database
     await this.userRepository.update(savedUser.id, { refresh_token });
@@ -94,7 +107,10 @@ export class AuthService {
     }
 
     // Generate JWT tokens
-    const { access_token, refresh_token } = this.generateTokens(user.id, user.email);
+    const { access_token, refresh_token } = this.generateTokens(
+      user.id,
+      user.email,
+    );
 
     // Save refresh token to database
     await this.userRepository.update(user.id, { refresh_token });
@@ -115,13 +131,15 @@ export class AuthService {
     return this.userRepository.findOne({ where: { id: userId } });
   }
 
-  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<BaseResponseDto<RefreshTokenResponseDto>> {
+  async refreshToken(
+    refreshTokenDto: RefreshTokenDto,
+  ): Promise<BaseResponseDto<RefreshTokenResponseDto>> {
     try {
       const { refresh_token } = refreshTokenDto;
-      
+
       // Verify the refresh token
       const payload = this.jwtService.verify(refresh_token);
-      
+
       // Find user with this refresh token
       const user = await this.userRepository.findOne({
         where: { id: payload.sub, refresh_token },
@@ -133,24 +151,31 @@ export class AuthService {
 
       // Generate new tokens
       const tokens = this.generateTokens(user.id, user.email);
-      
+
       // Update refresh token in database
-      await this.userRepository.update(user.id, { refresh_token: tokens.refresh_token });
+      await this.userRepository.update(user.id, {
+        refresh_token: tokens.refresh_token,
+      });
 
       return BaseResponseDto.success(tokens, 'Tokens refreshed successfully');
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
 
-  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<BaseResponseDto<any>> {
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<BaseResponseDto<any>> {
     const { email } = forgotPasswordDto;
 
     // Check if user exists
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       // Don't reveal if email exists or not for security
-      return BaseResponseDto.success(null, 'If the email exists, an OTP has been sent');
+      return BaseResponseDto.success(
+        null,
+        'If the email exists, an OTP has been sent',
+      );
     }
 
     // Generate OTP
@@ -161,7 +186,7 @@ export class AuthService {
     // Invalidate any existing OTPs for this email
     await this.otpRepository.update(
       { email, type: 'password_reset', is_used: false },
-      { is_used: true }
+      { is_used: true },
     );
 
     // Save new OTP
@@ -176,10 +201,15 @@ export class AuthService {
     // Send OTP via email (will log if SMTP not configured)
     await this.emailService.sendPasswordResetOTP(email, otpCode);
 
-    return BaseResponseDto.success(null, 'If the email exists, an OTP has been sent');
+    return BaseResponseDto.success(
+      null,
+      'If the email exists, an OTP has been sent',
+    );
   }
 
-  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<BaseResponseDto<any>> {
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<BaseResponseDto<any>> {
     const { email, otp_code, new_password } = resetPasswordDto;
 
     // Find valid OTP
@@ -221,7 +251,7 @@ export class AuthService {
   async logout(userId: number): Promise<BaseResponseDto<any>> {
     // Invalidate refresh token
     await this.userRepository.update(userId, { refresh_token: null });
-    
+
     return BaseResponseDto.success(null, 'Logged out successfully');
   }
 }

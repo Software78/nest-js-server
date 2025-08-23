@@ -13,9 +13,9 @@ export class BaseResponseDto<T = any> {
   @ApiProperty({ description: 'Error details', required: false })
   error?: any;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Response timestamp',
-    example: '2023-01-01T00:00:00.000Z'
+    example: '2023-01-01T00:00:00.000Z',
   })
   timestamp: string;
 

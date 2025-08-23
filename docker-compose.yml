@@ -22,6 +22,43 @@ services:
     networks:
       - app-network
 
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: nestjs_db
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass redis123
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   # NestJS Application
   app:
     build:
@@ -36,11 +73,21 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_NAME: nestjs_db
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/nestjs_db?authSource=admin
+      MONGO_DB_NAME: nestjs_db
+      REDIS_URI: redis://:redis123@redis:6379
+      REDIS_PASSWORD: redis123
+      REDIS_DB: 0
       JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
       NODE_ENV: production
       PORT: 3000
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -49,6 +96,8 @@ services:
 
 volumes:
   postgres_data:
+  mongodb_data:
+  redis_data:
 
 networks:
   app-network:

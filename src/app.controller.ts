@@ -4,7 +4,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { UserResponseDto } from './auth/dto/auth-response.dto';
@@ -21,38 +21,47 @@ export class AppController {
   ) {}
 
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Welcome message',
-    description: 'Get a welcome message from the API'
+    description: 'Get a welcome message from the API',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Welcome message',
     schema: {
       type: 'string',
-      example: 'Hello World!'
-    }
+      example: 'Hello World!',
+    },
   })
   getHello(@RequestId() requestId: string): string {
-    this.logger.info('Getting hello message', { requestId, action: 'getHello' });
+    this.logger.info('Getting hello message', {
+      requestId,
+      action: 'getHello',
+    });
     return this.appService.getHello();
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get user profile',
-    description: 'Get the current authenticated user profile (requires JWT token)'
+    description:
+      'Get the current authenticated user profile (requires JWT token)',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'User profile retrieved successfully',
-    type: BaseResponseDto<UserResponseDto>
+    type: BaseResponseDto<UserResponseDto>,
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
   getProfile(@Request() req): BaseResponseDto<UserResponseDto> {
     const userDto = transformUserToDto(req.user);
-    return BaseResponseDto.success(userDto, 'User profile retrieved successfully');
+    return BaseResponseDto.success(
+      userDto,
+      'User profile retrieved successfully',
+    );
   }
 }
