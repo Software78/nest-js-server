@@ -1,12 +1,12 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
-    ApiBearerAuth,
-    ApiOperation,
-    ApiParam,
-    ApiQuery,
-    ApiResponse,
-    ApiTags,
-    ApiUnauthorizedResponse,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { UserResponseDto } from '../auth/dto/auth-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -18,7 +18,7 @@ import { UsersService } from './users.service';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get()
   @ApiOperation({
