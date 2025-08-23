@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-nestjs_db}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256 --auth-local=scram-sha-256'
       PGDATA: /var/lib/postgresql/data/pgdata
     # Remove public port exposure for security
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-nestjs_db}
     # Remove public port exposure for security
     # ports:
@@ -76,14 +76,14 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-nestjs_db}
-      MONGO_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB_NAME:-nestjs_db}?authSource=admin
+      MONGO_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/${MONGO_DB_NAME:-nestjs_db}?authSource=admin
       MONGO_DB_NAME: ${MONGO_DB_NAME:-nestjs_db}
       REDIS_URI: redis://:${REDIS_PASSWORD}@redis:6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
       REDIS_DB: 0
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-jwt_secret}
       NODE_ENV: development
       PORT: 3000
     ports:
