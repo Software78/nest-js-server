@@ -1,13 +1,22 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { BaseResponseDto } from '../common/dto';
 import { AuthService } from './auth.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -103,12 +112,12 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 password reset attempts per minute
   @ApiOperation({
     summary: 'Reset password',
-    description: 'Reset password using OTP code',
+    description: 'Reset password using OTP code and revoke all existing sessions',
   })
   @ApiBody({ type: ResetPasswordDto })
   @ApiResponse({
     status: 200,
-    description: 'Password reset successfully',
+    description: 'Password reset successfully. All existing sessions have been terminated.',
     type: BaseResponseDto,
   })
   @ApiResponse({
@@ -121,7 +130,42 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 password change attempts per minute
+  @ApiOperation({
+    summary: 'Change password',
+    description: 'Change user password and revoke all existing sessions',
+  })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed successfully',
+    type: BaseResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid input data or same password',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid current password or missing JWT token',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async changePassword(
+    @Request() req,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<BaseResponseDto<any>> {
+    const userId = req.user.sub; // Extract user ID from JWT payload
+    return this.authService.changePassword(userId, changePasswordDto);
+  }
+
   @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'User logout',
     description: 'Invalidate refresh token and logout user',
@@ -131,11 +175,11 @@ export class AuthController {
     description: 'Logged out successfully',
     type: BaseResponseDto,
   })
-  logout(): Promise<BaseResponseDto<any>> {
-    // Note: In a real implementation, you'd need to get the user ID from the JWT token
-    // For now, this is a placeholder that would need to be implemented with proper authentication
-    throw new Error(
-      'Logout endpoint requires authentication - implement with JWT guard',
-    );
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async logout(@Request() req): Promise<BaseResponseDto<any>> {
+    const userId = req.user.sub; // Extract user ID from JWT payload
+    return this.authService.logout(userId);
   }
 }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +15,7 @@ import { transformUserToDto } from '../common/utils/user-transform.util';
 import { Otp } from '../entities/otp.entity';
 import { User } from '../entities/user.entity';
 import { AuthDataDto, AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import {
@@ -31,7 +33,7 @@ export class AuthService {
     private readonly otpRepository: Repository<Otp>,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   private generateTokens(userId: number, email: string) {
     const payload = { sub: userId, email };
@@ -245,7 +247,10 @@ export class AuthService {
     // Mark OTP as used
     await this.otpRepository.update(otp.id, { is_used: true });
 
-    return BaseResponseDto.success(null, 'Password reset successfully');
+    return BaseResponseDto.success(
+      null,
+      'Password reset successfully. All existing sessions have been terminated.',
+    );
   }
 
   async logout(userId: number): Promise<BaseResponseDto<any>> {
@@ -253,5 +258,49 @@ export class AuthService {
     await this.userRepository.update(userId, { refresh_token: null });
 
     return BaseResponseDto.success(null, 'Logged out successfully');
+  }
+
+  async changePassword(
+    userId: number,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<BaseResponseDto<any>> {
+    const { current_password, new_password } = changePasswordDto;
+
+    // Find user by ID
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(
+      current_password,
+      user.password,
+    );
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    // Check if new password is different from current password
+    if (current_password === new_password) {
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(new_password, 12);
+
+    // Update user password and invalidate refresh token
+    // This will revoke all existing access tokens since refresh token is nullified
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      refresh_token: null,
+    });
+
+    return BaseResponseDto.success(
+      null,
+      'Password changed successfully. All existing sessions have been terminated.',
+    );
   }
 }
