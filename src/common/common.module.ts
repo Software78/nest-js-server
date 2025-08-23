@@ -22,4 +22,4 @@ import { EmailService } from './services/email.service';
     CacheService,
   ],
 })
-export class CommonModule { }
+export class CommonModule {}

@@ -1,111 +1,110 @@
 # NestJS Authentication API with PostgreSQL, MongoDB, Redis and Docker
 
-A complete NestJS application with JWT authentication, multiple database support (PostgreSQL, MongoDB, Redis), Docker containerization, and advanced security features.
+A complete NestJS application with JWT authentication, multiple database support (PostgreSQL, MongoDB, Redis), Docker containerization, and **enterprise-grade security features**.
 
-## Features
+## 🛡️ **Security Features**
 
-- 🔐 **JWT Authentication** - Login/Register with refresh tokens
-- 🔑 **Password Reset** - OTP-based password recovery via email
-- 🗄️ **Multi-Database Support** - PostgreSQL, MongoDB, and Redis
-- 🆔 **Dual ID System** - Integer IDs for internal use, UUIDs for external APIs
-- 🛡️ **Security-First** - Data redaction, input validation, soft deletes
-- 🐳 **Docker & Docker Compose** - Complete containerization
-- 📧 **Email Service** - SMTP integration with fallback logging
-- 📊 **Structured Logging** - Winston with request tracking
-- 🔒 **Password Security** - bcrypt hashing with 12 rounds
-- ✅ **Input Validation** - class-validator with comprehensive DTOs
-- 🚀 **Production-Ready** - Environment-based configuration
-- 📝 **Document Management** - MongoDB-based document storage
-- ⚡ **Caching & Sessions** - Redis-based caching and session management
+- **Rate Limiting**: Protection against brute force attacks
+- **Strong Password Policy**: 12+ characters with complexity requirements
+- **Secure JWT**: Short-lived tokens with issuer/audience validation
+- **CORS Protection**: Restricted origins and methods
+- **Security Headers**: Helmet.js for comprehensive protection
+- **Input Validation**: Class-validator with strict validation
+- **Data Redaction**: Sensitive data automatically excluded from logs
+- **Network Isolation**: Database ports not exposed publicly
+- **Strong Authentication**: bcrypt with 12 rounds
 
-## API Endpoints
+## 🔐 **Authentication & Authorization**
 
-### Authentication
+- **JWT Authentication** - Login/Register with refresh tokens
+- **Password Reset** - OTP-based password recovery via email
+- **Rate Limiting** - Configurable limits per endpoint type
+- **Session Management** - Secure token handling
 
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login user
-- `POST /auth/refresh` - Refresh JWT tokens
-- `POST /auth/forgot-password` - Request password reset OTP
-- `POST /auth/reset-password` - Reset password with OTP
-- `POST /auth/logout` - Logout and invalidate tokens
+## 🗄️ **Multi-Database Support**
 
-### Users (Protected)
+- **PostgreSQL** - Primary database with TypeORM
+- **MongoDB** - Document storage (internal use only)
+- **Redis** - Caching and session management (internal use only)
 
-- `GET /users` - Get all users (paginated)
-- `GET /users/:uuid` - Get user by UUID
+## 🆔 **Advanced Features**
 
-### Public
+- **Dual ID System** - Integer IDs for internal use, UUIDs for external APIs
+- **Data Redaction** - Sensitive fields automatically excluded from logs and responses
+- **Soft Deletes** - Records marked as deleted without physical removal
+- **Request Tracking** - Unique request IDs for debugging and monitoring
 
-- `GET /` - Welcome message
+## 🐳 **Docker & Docker Compose**
 
-## Project Setup
+- **Complete containerization** for development and production
+- **Network isolation** for security
+- **Health checks** for all services
+- **Environment-based configuration**
 
-### Prerequisites
+## 📧 **Email Service**
+
+- **SMTP integration** with fallback logging
+- **OTP delivery** for password resets
+- **Configurable templates**
+
+## 📊 **Structured Logging**
+
+- **Winston** with request tracking
+- **Request ID correlation**
+- **Sensitive data redaction**
+- **Configurable log levels**
+
+## 🚀 **Production Ready**
+
+- **Environment-based configuration**
+- **Security best practices**
+- **Performance optimizations**
+- **Comprehensive error handling**
+
+## 📋 **Prerequisites**
 
 - Node.js (v18 or higher)
 - Docker & Docker Compose
 - npm
 
-### Installation
+## 🚀 **Quick Start**
 
-1. **Clone and install dependencies:**
+### 1. **Clone and Install Dependencies**
 
 ```bash
+git clone <your-repo>
+cd nest_js_example
 npm install
 ```
 
-2. **Environment Configuration:**
-   Create a `.env` file in the root directory:
+### 2. **Environment Configuration**
 
-```env
-# PostgreSQL Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=nestjs_db
+**IMPORTANT**: Copy the secure environment template and update with your values:
 
-# MongoDB Configuration
-MONGO_URI=mongodb://admin:admin123@localhost:27017/nestjs_db?authSource=admin
-MONGO_DB_NAME=nestjs_db
-
-# Redis Configuration
-REDIS_URI=redis://localhost:6379
-REDIS_PASSWORD=redis123
-REDIS_DB=0
-
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-
-# Application
-PORT=3000
-NODE_ENV=development
-
-# Logging Configuration
-LOG_LEVEL=info
-LOG_DIR=logs
-
-# SMTP Configuration (optional - if not configured, OTPs will be logged instead)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=noreply@yourapp.com
-
-# Feature Flags (set to 'true' to skip specific services)
-# SKIP_DB=true
-# SKIP_MONGO=true
-# SKIP_REDIS=true
+```bash
+cp env.secure .env
+# Edit .env with your actual passwords and configuration
 ```
 
-## Running the Application
+**Required Environment Variables:**
 
-### Option 1: Docker (Recommended)
+- `DB_PASSWORD` - Strong PostgreSQL password
+- `MONGO_PASSWORD` - Strong MongoDB password
+- `REDIS_PASSWORD` - Strong Redis password
+- `JWT_SECRET` - Cryptographically secure random string (64+ chars)
+
+### 3. **Generate Strong JWT Secret**
+
+```bash
+openssl rand -base64 64
+```
+
+### 4. **Start the Application**
 
 **Development with hot reload:**
 
 ```bash
-# Start only PostgreSQL database
+# Start only databases
 npm run docker:dev
 
 # In another terminal, run the app locally
@@ -115,314 +114,129 @@ npm run start:dev
 **Full production setup:**
 
 ```bash
-# Build and start both app and database
 npm run docker:prod
 ```
 
-### Option 2: Local Development
+## 🔒 **Security Configuration**
 
-**Start PostgreSQL database only:**
+### **Rate Limiting**
 
-```bash
-docker-compose -f docker-compose.dev.yml up postgres
-```
+- **Default**: 100 requests per minute
+- **Authentication**: 10 requests per minute
+- **Registration**: 5 requests per minute
+- **Login**: 5 attempts per minute
+- **Password Reset**: 3 requests per minute
 
-**Run the application:**
+### **Password Requirements**
 
-```bash
-# Development with hot reload
-npm run start:dev
+- **Minimum length**: 12 characters
+- **Complexity**: Uppercase, lowercase, number, special character
+- **Hashing**: bcrypt with 12 rounds
 
-# Production build
-npm run build
-npm run start:prod
-```
+### **JWT Security**
 
-## API Usage Examples
+- **Access token**: 15 minutes expiration
+- **Issuer validation**: `nestjs-auth-api`
+- **Audience validation**: `nestjs-users`
+- **No weak fallbacks**
 
-### Register a new user
+### **CORS Protection**
 
-```bash
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "password": "password123"
-  }'
-```
+- **Development**: `localhost:3000`, `localhost:3001`
+- **Production**: Configurable allowed origins
+- **Methods**: GET, POST, PUT, DELETE, PATCH
+- **Headers**: Content-Type, Authorization, x-request-id
 
-### Login
+## 📚 **API Documentation**
 
-```bash
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "password123"
-  }'
-```
+### **Authentication Endpoints**
 
-### Request password reset
+- `POST /auth/register` - Register new user (rate limited: 5/min)
+- `POST /auth/login` - User login (rate limited: 5/min)
+- `POST /auth/refresh` - Refresh JWT tokens (rate limited: 10/min)
+- `POST /auth/forgot-password` - Request password reset (rate limited: 3/min)
+- `POST /auth/reset-password` - Reset password with OTP (rate limited: 5/min)
+- `POST /auth/logout` - Logout and invalidate tokens
 
-```bash
-curl -X POST http://localhost:3000/auth/forgot-password \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com"
-  }'
-```
+### **Protected Endpoints**
 
-### Reset password with OTP
+- `GET /users` - Get all users (paginated)
+- `GET /users/:uuid` - Get user by UUID
+- `GET /profile` - Get current user profile
 
-```bash
-curl -X POST http://localhost:3000/auth/reset-password \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "otp_code": "123456",
-    "new_password": "newpassword123"
-  }'
-```
+### **Public Endpoints**
 
-### Get users (protected)
+- `GET /` - Welcome message
+- `GET /docs` - Swagger documentation (development only)
 
-```bash
-curl -X GET http://localhost:3000/users \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### Get specific user by UUID (protected)
-
-```bash
-curl -X GET http://localhost:3000/users/123e4567-e89b-12d3-a456-426614174000 \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-## Project Structure
+## 🏗️ **Project Structure**
 
 ```
 src/
-├── auth/
-│   ├── dto/                     # Authentication DTOs
-│   │   ├── auth-response.dto.ts # Auth response with user data
-│   │   ├── login.dto.ts         # Login request validation
-│   │   ├── register.dto.ts      # Registration validation
-│   │   ├── refresh-token.dto.ts # Token refresh
-│   │   └── forgot-password.dto.ts # Password reset DTOs
-│   ├── guards/
-│   │   └── jwt-auth.guard.ts    # JWT authentication guard
-│   ├── strategies/
-│   │   └── jwt.strategy.ts      # Passport JWT strategy
-│   ├── auth.controller.ts       # Auth endpoints
-│   ├── auth.service.ts         # Auth business logic
-│   └── auth.module.ts          # Auth module
-├── common/
-│   ├── database/                # Database configuration
-│   │   ├── database.module.ts   # Main database module
-│   │   ├── redis.module.ts      # Redis module
-│   │   └── redis.service.ts     # Redis service
-│   ├── dto/                    # Shared response DTOs
-│   │   ├── base-response.dto.ts      # Generic base response
-│   │   ├── pagination.dto.ts         # Pagination utilities
-│   │   └── paginated-response.dto.ts # Paginated responses
-│   ├── services/
-│   │   ├── email.service.ts     # Email/OTP service
-│   │   └── cache.service.ts     # Cache management service (internal)
-│   ├── logger/
-│   │   └── winston.config.ts    # Winston logging configuration
-│   ├── utils/
-│   │   ├── data-redaction.util.ts   # Security data redaction
-│   │   └── user-transform.util.ts   # User entity transformations
-│   ├── interceptors/
-│   │   └── request-id.interceptor.ts # Request tracking
-│   └── common.module.ts         # Common module
-├── entities/
-│   ├── base.entity.ts          # Base entity with UUID/timestamps
-│   ├── user.entity.ts          # User database entity
-│   └── otp.entity.ts           # OTP entity for password reset
-├── users/
-│   ├── users.controller.ts     # User management endpoints
-│   ├── users.service.ts        # User business logic
-│   └── users.module.ts         # Users module
-├── app.controller.ts           # Main app controller
-├── app.module.ts              # Root module
-├── app.service.ts             # Main app service
-└── main.ts                    # Application entry point
-
-scripts/
-└── init-db.sql                # Database initialization script
+├── auth/                    # Authentication module
+│   ├── dto/               # Validation DTOs
+│   ├── guards/            # JWT authentication guards
+│   ├── strategies/        # Passport JWT strategy
+│   ├── auth.controller.ts # Auth endpoints with rate limiting
+│   ├── auth.service.ts    # Authentication business logic
+│   └── auth.module.ts     # Auth module configuration
+├── common/                 # Shared functionality
+│   ├── database/          # Database configuration
+│   ├── dto/               # Response DTOs
+│   ├── services/          # Common services
+│   ├── utils/             # Utility functions
+│   ├── interceptors/      # Request tracking
+│   └── common.module.ts   # Common module
+├── entities/               # Database entities
+├── users/                  # User management
+└── main.ts                # Application entry point
 ```
 
-## Database Architecture
+## 🔧 **Configuration**
 
-The application uses PostgreSQL with TypeORM and a sophisticated entity architecture designed for security and performance.
+### **Environment Variables**
 
-### BaseEntity (Extended by all entities)
+See `env.secure` for a complete template with security best practices.
 
-- `id` - Integer primary key (internal use only, hidden from API responses)
-- `uuid` - UUID for external identification (exposed in API responses)
-- `created_at` - Creation timestamp (auto-generated)
-- `updated_at` - Last update timestamp (auto-updated)
-- `deleted_at` - Soft delete timestamp (for soft deletes)
+### **Docker Compose**
 
-### User Entity
+- **Development**: `docker-compose.dev.yml`
+- **Production**: `docker-compose.yml`
+- **Security**: Database ports not exposed publicly
 
-- Extends `BaseEntity`
-- `email` - Unique email address
-- `first_name` - User's first name
-- `last_name` - User's last name
-- `password` - Hashed password (excluded from responses)
-- `refresh_token` - JWT refresh token (excluded from responses)
+## 🚨 **Security Checklist**
 
-### OTP Entity
+- [x] Strong password requirements
+- [x] Rate limiting on all endpoints
+- [x] JWT security hardening
+- [x] CORS protection
+- [x] Security headers (Helmet.js)
+- [x] Input validation and sanitization
+- [x] Data redaction in logs
+- [x] Network isolation
+- [x] No weak fallbacks
+- [x] Secure authentication flow
 
-- Extends `BaseEntity`
-- `email` - Email address for OTP delivery
-- `otp_code` - 6-digit verification code
-- `type` - OTP type (password_reset, etc.)
-- `is_used` - Whether OTP has been consumed
-- `expires_at` - OTP expiration timestamp
+## 📝 **Development Notes**
 
-### Security Features
+- **Swagger**: Only enabled in development
+- **Logging**: Sensitive data automatically redacted
+- **Validation**: Strict input validation with class-validator
+- **Testing**: Comprehensive test coverage
+- **Linting**: ESLint with security-focused rules
 
-- **Dual ID System**: Integer IDs for performance, UUIDs for external APIs
-- **Data Redaction**: Sensitive fields automatically excluded from logs and responses
-- **Soft Deletes**: Records marked as deleted without physical removal
-- **Schema Sync**: Automatic database schema synchronization in development
+## 🤝 **Contributing**
 
-## Multi-Database Architecture
+1. Follow security best practices
+2. Update security documentation
+3. Test all security features
+4. Review rate limiting configuration
+5. Validate input sanitization
 
-The application now supports three different database technologies, each optimized for specific use cases. **MongoDB and Redis are configured as internal services and are not exposed as public API endpoints.**
+## 📄 **License**
 
-### PostgreSQL (Primary Database)
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- **Purpose**: User management, authentication, OTP storage
-- **Technology**: TypeORM with PostgreSQL
-- **Features**: ACID compliance, complex queries, relationships
-- **Use Cases**: User accounts, authentication tokens, system configuration
+## 🆘 **Support**
 
-### MongoDB (Document Database - Internal)
-
-- **Purpose**: Flexible document storage, content management (internal use)
-- **Technology**: Mongoose with MongoDB
-- **Features**: Schema flexibility, horizontal scaling, JSON-like documents
-- **Use Cases**: Internal document storage, flexible data structures (not exposed via API)
-
-### Redis (Cache & Session Store - Internal)
-
-- **Purpose**: Caching, session management, real-time data (internal use)
-- **Technology**: Redis client with advanced data structures
-- **Features**: In-memory storage, TTL support, pub/sub capabilities
-- **Use Cases**: Internal API response caching, user sessions, rate limiting, real-time counters (not exposed via API)
-
-### Database Module Architecture
-
-The `DatabaseModule` provides a unified interface for all database connections:
-
-```typescript
-@Module({
-  imports: [
-    // PostgreSQL with TypeORM
-    TypeOrmModule.forRootAsync({...}),
-
-    // MongoDB with Mongoose (internal)
-    MongooseModule.forRootAsync({...}),
-
-    // Redis (internal)
-    RedisModule,
-  ],
-})
-export class DatabaseModule {}
-```
-
-### Internal Services Available
-
-While not exposed as public APIs, the following services are available for internal use:
-
-- **CacheService**: Redis-based caching operations
-- **RedisService**: Low-level Redis operations
-- **MongoDB Connection**: Available for custom document schemas and services
-
-### Feature Flags
-
-You can selectively disable databases using environment variables:
-
-- `SKIP_DB=true` - Disable PostgreSQL
-- `SKIP_MONGO=true` - Disable MongoDB
-- `SKIP_REDIS=true` - Disable Redis
-
-This allows for flexible deployment scenarios and testing individual components.
-
-## Development Scripts
-
-```bash
-# Install dependencies
-npm install
-
-# Development server with hot reload
-npm run start:dev
-
-# Production build
-npm run build
-
-# Run tests
-npm test
-npm run test:e2e
-
-# Linting and formatting
-npm run lint
-npm run format
-
-# Docker commands
-npm run docker:dev    # Start dev database only
-npm run docker:prod   # Full production setup
-```
-
-## Security Features
-
-### Authentication & Authorization
-
-- **JWT Authentication** with access and refresh tokens
-- **Password Hashing** with bcrypt (12 rounds)
-- **Token Expiration** - Access tokens (15min), Refresh tokens (7 days)
-- **Protected Routes** with JWT guards
-
-### Data Security
-
-- **Integer ID Protection** - Never expose database IDs externally
-- **UUID External IDs** - Secure, non-enumerable external identifiers
-- **Data Redaction** - Automatic removal of sensitive data from logs
-- **Password Exclusion** - Passwords never included in API responses
-- **Input Validation** - Comprehensive validation with class-validator
-
-### Infrastructure Security
-
-- **Environment Configuration** - Secrets stored in environment variables
-- **CORS Enabled** - Cross-origin resource sharing configured
-- **Request Tracking** - Unique request IDs for audit trails
-- **Structured Logging** - Security-focused logging with Winston
-- **Email Security** - OTP-based password reset with expiration
-
-## Production Deployment
-
-### Security Checklist
-
-1. **Set strong `JWT_SECRET`** - Use a cryptographically secure random string
-2. **Configure database credentials** - Use strong passwords and restricted access
-3. **Set `NODE_ENV=production`** - Enables production optimizations
-4. **Configure SMTP** - Set up email service for password reset functionality
-5. **Review logging levels** - Set appropriate LOG_LEVEL for production
-6. **Enable SSL/TLS** - Use HTTPS in production environments
-
-### Deployment Options
-
-- **Docker Compose**: Use `docker-compose.yml` for container orchestration
-- **Database Migrations**: Consider switching from synchronize to migrations for production
-- **Secrets Management**: Use container secrets or vault solutions for sensitive data
-- **Monitoring**: Implement health checks and monitoring for the application
-
-## License
-
-This project is [MIT licensed](LICENSE).
+For security issues, please contact the development team directly.

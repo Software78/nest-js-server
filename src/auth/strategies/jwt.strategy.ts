@@ -10,11 +10,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {
+    const jwtSecret = configService.get<string>('JWT_SECRET');
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>('JWT_SECRET') || 'default-secret-key',
+      secretOrKey: jwtSecret,
+      issuer: 'nestjs-auth-api',
+      audience: 'nestjs-users',
     });
   }
 

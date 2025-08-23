@@ -233,8 +233,8 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(new_password, 10);
+    // Hash new password with consistent 12 rounds
+    const hashedPassword = await bcrypt.hash(new_password, 12);
 
     // Update user password and invalidate refresh token
     await this.userRepository.update(user.id, {

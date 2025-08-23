@@ -18,10 +18,20 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     CommonModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'default-secret-key',
-        signOptions: { expiresIn: '24h' },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const jwtSecret = configService.get<string>('JWT_SECRET');
+        if (!jwtSecret) {
+          throw new Error('JWT_SECRET environment variable is required');
+        }
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: '15m', // Shorter access token for security
+            issuer: 'nestjs-auth-api',
+            audience: 'nestjs-users',
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
